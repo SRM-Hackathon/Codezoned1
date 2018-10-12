@@ -1,4 +1,5 @@
-# Team Codezoned1
+# Team Codezoned
 
-### TODO
+# Iris2Mouse 
 
+**README will be properly updated in the later commits** :smile:
