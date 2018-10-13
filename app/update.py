@@ -5,9 +5,12 @@ import dlib
 import cv2
 import numpy as np
 import pyautogui
+from scipy.spatial import distance
 
 
-detect = dlib.get_frontal_face_detector()
+threshold = 0.2
+
+detect  = dlib.get_frontal_face_detector()
 predict = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
 
 (left_start, left_end) = face_utils.FACIAL_LANDMARKS_68_IDXS["left_eye"]
@@ -64,6 +67,14 @@ def smallest(circles,cimg):
 
 
 
+def ear(eyex):
+	A = distance.euclidean(eyex[1],eyex[5])
+	B = distance.euclidean(eyex[2], eyex[4])
+	C = distance.euclidean(eyex[0], eyex[3])
+
+	eard = (A+B)/(2.0 * C)
+
+	return eard
 
 
 
@@ -117,16 +128,16 @@ while True:
     #global countl,countr
     #global xal,xbl,rl,xar,xbr,rr
     #global mxl,myl,mrl,mxr,myr,mrr
-    
+    Mcount+=Mcount
     for subject in subjects:
         shape = predict(gray, subject)
-        shape2 = face_utils.shape_to_np(shape)
-        left_eye = shape2[left_start:left_end]
-        right_eye = shape2[right_start:right_end]
+        shape = face_utils.shape_to_np(shape)
+        left_eye = shape[left_start:left_end]
+        right_eye = shape[right_start:right_end]
         left_eye_hull = cv2.convexHull(left_eye)
         right_eye_hull = cv2.convexHull(right_eye)
-        #cv2.drawContours(frame,[left_eye_hull], -1, (255,0,255), 1)
-        #cv2.drawContours(frame, [right_eye_hull], -1, (255,0,255), 1)
+        cv2.drawContours(frame,[left_eye_hull], -1, (255,0,255), 1)
+        cv2.drawContours(frame, [right_eye_hull], -1, (255,0,255), 1)
 
         xL=int((left_eye_hull[0][0][0]+left_eye_hull[3][0][0])/2)
         yL=int((left_eye_hull[0][0][1]+left_eye_hull[3][0][1])/2)
@@ -139,26 +150,46 @@ while True:
 
         RxFact=1980/eye_width
         RyFact=1024/eye_height
+        try:
     
-        left=frame[left_eye_hull[4][0][1]:left_eye_hull[1][0][1],left_eye_hull[4][0][0]:left_eye_hull[1][0][0]]
+            left=frame[left_eye_hull[4][0][1]:left_eye_hull[1][0][1],left_eye_hull[4][0][0]:left_eye_hull[1][0][0]]
 
-        left =cv2.cvtColor(left,cv2.COLOR_RGB2GRAY)
-        left = cv2.GaussianBlur(left,(5,5),0)
+            left =cv2.cvtColor(left,cv2.COLOR_RGB2GRAY)
+            left = cv2.GaussianBlur(left,(5,5),0)
 
-        left=cv2.equalizeHist(left)
+            left=cv2.equalizeHist(left)
 
-        right=frame[right_eye_hull[4][0][1]:right_eye_hull[1][0][1],right_eye_hull[4][0][0]:right_eye_hull[1][0][0]]
+            right=frame[right_eye_hull[4][0][1]:right_eye_hull[1][0][1],right_eye_hull[4][0][0]:right_eye_hull[1][0][0]]
         
-        right =cv2.cvtColor(right,cv2.COLOR_RGB2GRAY)
-        right = cv2.GaussianBlur(right,(5,5),0)
+            right =cv2.cvtColor(right,cv2.COLOR_RGB2GRAY)
+            right = cv2.GaussianBlur(right,(5,5),0)
 
-        right=cv2.equalizeHist(right)
+            right=cv2.equalizeHist(right)
+        except Exception as e:
+            print(e)
         
         
         try:
+
+                leftEar = ear(left_eye)
+                rightEar = ear(right_eye)
+                ratio = (leftEar + rightEar) / 2.0
+                if(Mcount%3==0):
+                    blink_count=0
+                    
+                    
+                print(ratio)
+	        # This will come in the for loop
+                if(ratio < threshold):
+                    blink_count = blink_count + 1
+                    print("BLINKING BEEEEEP")
+                if(blink_count>=1):
+                    pyautogui.doubleClick()
+
+		
                 xar,xbr,rr,countr,mxr,myr,mrr=eye(right,xar,xbr,rr,countr,mxr,myr,mrr,right_eye_hull)
                 xal,xbl,rl,countl,mxl,myl,mrl=eye(left,xal,xbl,rl,countl,mxl,myl,mrl,left_eye_hull)
-                
+                    
                 Rightx=abs((xR-mxr))
                 Righty=abs((yR-myr))
                 Leftx=abs((xL-mxl))
@@ -193,7 +224,7 @@ while True:
     #pyautogui.moveTo(Mxx,Myy,0)
     
         
-    pyautogui.moveRel(-Mxx,Myy,0)		
+    pyautogui.dragRel(-Mxx,Myy,0.5)		
     cv2.imshow('Aankh',frame)
     #break
     if cv2.waitKey(1) & 0xFF == ord('q'):
