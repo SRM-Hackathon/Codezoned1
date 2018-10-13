@@ -6,12 +6,15 @@ import cv2
 import numpy as np
 import pyautogui
 from scipy.spatial import distance
+import os
 
 
 threshold = 0.2
 
 detect  = dlib.get_frontal_face_detector()
-predict = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
+path=os.getcwd()
+path=path+ '/models/shape_predictor_68_face_landmarks.dat' 
+predict = dlib.shape_predictor(path)
 
 (left_start, left_end) = face_utils.FACIAL_LANDMARKS_68_IDXS["left_eye"]
 (right_start, right_end) = face_utils.FACIAL_LANDMARKS_68_IDXS["right_eye"]
@@ -110,7 +113,7 @@ def eye(cimg,xa,xb,r,count,mx,my,mr,eye_hull):
                     mx,my,mr=xa,xb,r
                 
                 
-                cv2.circle(frame,(mx,my),mr,(255,0,0),2)
+                cv2.circle(frame,(a,b),c,(0,255,0),2)
     except Exception as e:
         print(e)
     return xa,xb,r,count,mx,my,mr
@@ -132,6 +135,7 @@ while True:
     for subject in subjects:
         shape = predict(gray, subject)
         shape = face_utils.shape_to_np(shape)
+        cv2.drawContours(frame,[shape],-1,(255,0,255),1)
         left_eye = shape[left_start:left_end]
         right_eye = shape[right_start:right_end]
         left_eye_hull = cv2.convexHull(left_eye)
@@ -174,17 +178,16 @@ while True:
                 leftEar = ear(left_eye)
                 rightEar = ear(right_eye)
                 ratio = (leftEar + rightEar) / 2.0
-                if(Mcount%3==0):
+                if(Mcount%4==0):
                     blink_count=0
                     
                     
-                print(ratio)
 	        # This will come in the for loop
                 if(ratio < threshold):
                     blink_count = blink_count + 1
-                    print("BLINKING BEEEEEP")
-                if(blink_count>=1):
-                    pyautogui.doubleClick()
+                    #print("BLINKING BEEEEEP")
+                if(blink_count>=1): 
+                    pyautogui.click()
 
 		
                 xar,xbr,rr,countr,mxr,myr,mrr=eye(right,xar,xbr,rr,countr,mxr,myr,mrr,right_eye_hull)
@@ -205,11 +208,12 @@ while True:
                 if(Myy>1024):
                     Myy=1024
                 
-                print(Mxx,Myy)
 
-                
+                if(p==0):
+                    p,q=mxl,myl
                 Mxx=(mxl-p)*10
                 Myy=(myl-q)*10
+
                 p=mxl
                 q=myl
                 
@@ -223,8 +227,10 @@ while True:
     
     #pyautogui.moveTo(Mxx,Myy,0)
     
-        
-    pyautogui.dragRel(-Mxx,Myy,0.5)		
+    try:   
+        pyautogui.moveRel(-Mxx,Myy,0.5)
+    except Exception as e:
+        print(e)
     cv2.imshow('Aankh',frame)
     #break
     if cv2.waitKey(1) & 0xFF == ord('q'):
