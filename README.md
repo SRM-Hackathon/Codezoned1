@@ -28,7 +28,7 @@ pip install requirements.txt
 
 2) Dlib will require cmake to build the c++ bindings and visual studio to compile. Install Dlib seperately
 
-3) Run updated.py in the /app/ folder
+3) Run irisPointer.py in the root directory
 
 
 
