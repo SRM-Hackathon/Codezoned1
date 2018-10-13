@@ -27,7 +27,7 @@ X,Y=0,0
 
 
 
-
+p,q=0,0
 
 
 def smallest(circles,cimg):
@@ -164,8 +164,8 @@ while True:
                 Leftx=abs((xL-mxl))
                 Lefty=abs((yL-myl))
 
-                Ravg=(Rightx+Righty)/2
-                Lavg=(Leftx+Lefty)/2
+                Ravg=(Rightx+Leftx)/2
+                Lavg=(Righty+Lefty)/2
 
                 Mxx=int(1980/2+RxFact*Ravg)
                 Myy=int(1024/2+RyFact*Lavg)
@@ -173,32 +173,27 @@ while True:
                     Mxx=1980
                 if(Myy>1024):
                     Myy=1024
-                Mx=Mx+Mxx
-                My=My+Myy
-                print(My)
-                print("Running")
-                if(Mcount==25):
-                    cordsx.append(Mx)
-                    cordsy.append(My)
-                    k=k+1
-                    Mcount=0
-                    Mx=0
-                    My=0
-                    xdd=input("Over")
-                Mcount=Mcount+1
+                
+                print(Mxx,Myy)
+
+                
+                Mxx=(mxl-p)*10
+                Myy=(myl-q)*10
+                p=mxl
+                q=myl
                 
     
         except Exception as e:
                 print(e)
         
         #cv2.circle(frame,(x,y),5,(255,0,0),3)
-    #print(X,Y)
+   #print(X,Y)
     #print(offsetx,offsety)
     
     #pyautogui.moveTo(Mxx,Myy,0)
     
         
-    #pyautogui.moveRel(offsetx,offsety,0.5)		
+    pyautogui.moveRel(-Mxx,Myy,0)		
     cv2.imshow('Aankh',frame)
     #break
     if cv2.waitKey(1) & 0xFF == ord('q'):
