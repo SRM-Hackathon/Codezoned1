@@ -1,6 +1,0 @@
-opencv-python
-scipy
-dlib
-imutils
-numpy
-pyautogui
